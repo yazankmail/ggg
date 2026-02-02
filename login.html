@@ -7,12 +7,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        
         body {
             margin: 0; height: 100vh; display: flex;
             justify-content: center; align-items: center;
             overflow: hidden; background-color: #000;
+            font-family: 'Cairo', sans-serif;
         }
 
         .bg-image {
@@ -29,28 +28,23 @@
             text-align: center; color: #fff; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        h2 { margin-top: 0; margin-bottom: 10px; font-weight: 800; font-size: 28px; }
-        p { margin-bottom: 30px; color: rgba(255, 255, 255, 0.8); font-size: 14px; }
+        h2 { margin-top: 0; font-weight: 800; font-size: 28px; }
+        p { color: rgba(255, 255, 255, 0.8); font-size: 14px; margin-bottom: 30px; }
 
         .google-btn {
             background: white; color: #333; width: 100%; padding: 12px;
             border-radius: 12px; border: none; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.3s; margin-top: 20px;
+            transition: 0.3s; margin-top: 10px;
         }
         .google-btn:hover { background: #f1f1f1; transform: scale(1.02); }
 
-        /* رسائل الحالة */
-        #status-msg { margin-top: 20px; font-weight: bold; font-size: 14px; display: none; }
-        .success { color: #4CAF50; }
-        .error { color: #ff4747; }
-        
-        /* زر الانتقال اليدوي (يظهر عند الضرورة) */
-        #manual-redirect {
-            display: none; margin-top: 15px; background: #0056b3; 
-            color: white; padding: 10px 20px; border-radius: 8px; 
-            text-decoration: none; font-size: 14px;
+        #msg-box {
+            margin-top: 20px; font-size: 14px; font-weight: bold;
+            display: none; padding: 10px; border-radius: 8px;
         }
+        .success { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+        .error { background: rgba(244, 67, 54, 0.2); color: #ff4747; border: 1px solid #ff4747; }
     </style>
 </head>
 <body>
@@ -59,23 +53,20 @@
 
     <div class="glass-card">
         <h2>أهلاً بك 👋</h2>
-        <p>يرجى تسجيل الدخول للوصول إلى لوحة التحكم</p>
+        <p>بوابة إدارة متجر Wusooly</p>
 
-        <button id="google-login-btn" class="google-btn">
+        <button id="login-btn" class="google-btn">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-            الدخول كمسؤول (Google)
+            تسجيل الدخول (Google)
         </button>
 
-        <div id="status-msg"></div>
-        <a id="manual-redirect" href="./index.html">اضغط هنا للانتقال للوحة التحكم</a>
-
-        <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">Wusooly Admin Panel</div>
+        <div id="msg-box"></div>
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">Wusooly Admin Panel &copy; 2026</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // إضافة setPersistence و browserLocalPersistence
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBa0RwEcbVqWYAKeUFeZy2IDihaxUxtNKY",
@@ -89,60 +80,55 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-        const ALLOWED_ADMIN = "hmamda320@gmail.com";
+        const ADMIN_EMAIL = "hmamda320@gmail.com";
 
-        const btn = document.getElementById('google-login-btn');
-        const statusMsg = document.getElementById('status-msg');
-        const manualLink = document.getElementById('manual-redirect');
+        const btn = document.getElementById('login-btn');
+        const msgBox = document.getElementById('msg-box');
 
-        function showStatus(text, type) {
-            statusMsg.innerText = text;
-            statusMsg.className = type;
-            statusMsg.style.display = 'block';
+        function showMsg(text, type) {
+            msgBox.innerText = text;
+            msgBox.className = type;
+            msgBox.style.display = 'block';
         }
 
-        // 1. مراقبة الحالة (تعمل فور العودة من جوجل)
+        // فحص تلقائي إذا كان المستخدم مسجل مسبقاً
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                if (user.email === ALLOWED_ADMIN) {
-                    // نجح الدخول
-                    showStatus(`أهلاً ${user.displayName.split(' ')[0]}! جاري توجيهك...`, "success");
-                    btn.style.display = 'none';
-                    
-                    // محاولة التوجيه التلقائي
-                    setTimeout(() => {
-                        window.location.href = "./index.html"; 
-                    }, 1500);
-
-                    // إظهار زر يدوي احتياطاً
-                    manualLink.style.display = "inline-block";
-                } else {
-                    // إيميل خاطئ
-                    showStatus("⛔ هذا الإيميل ليس للمدير!", "error");
-                    signOut(auth);
-                }
+            if (user && user.email === ADMIN_EMAIL) {
+                showMsg("أنت مسجل دخول بالفعل.. جاري التحويل 🔄", "success");
+                setTimeout(() => window.location.href = "index.html", 1000);
             }
         });
 
-        // 2. زر الدخول (مع تثبيت الجلسة)
         btn.addEventListener('click', () => {
-            showStatus("جاري الاتصال بجوجل...", "success");
-            
-            // فرض حفظ تسجيل الدخول في المتصفح
+            btn.disabled = true;
+            btn.innerText = "جاري فتح النافذة...";
+
+            // 1. تثبيت الجلسة أولاً (أهم خطوة لمنع الخروج التلقائي)
             setPersistence(auth, browserLocalPersistence)
                 .then(() => {
-                    return signInWithRedirect(auth, provider);
+                    // 2. فتح النافذة المنبثقة
+                    return signInWithPopup(auth, provider);
+                })
+                .then((result) => {
+                    const user = result.user;
+                    if (user.email === ADMIN_EMAIL) {
+                        showMsg(`أهلاً ${user.displayName}! تم الدخول بنجاح ✅`, "success");
+                        // 3. التحويل بعد نجاح الحفظ
+                        setTimeout(() => window.location.href = "index.html", 1500);
+                    } else {
+                        showMsg("⛔ هذا الحساب ليس للمدير!", "error");
+                        auth.signOut();
+                        btn.disabled = false;
+                        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> تسجيل الدخول (Google)';
+                    }
                 })
                 .catch((error) => {
-                    showStatus("خطأ: " + error.message, "error");
+                    console.error(error);
+                    showMsg("حدث خطأ: " + error.message, "error");
+                    btn.disabled = false;
+                    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> تسجيل الدخول (Google)';
                 });
         });
-
-        // 3. التقاط أخطاء الـ Redirect إن وجدت
-        getRedirectResult(auth).catch((error) => {
-            showStatus("فشل الدخول: " + error.message, "error");
-        });
     </script>
-
 </body>
 </html>
