@@ -10,83 +10,47 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         
         body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            background-color: #000;
+            margin: 0; height: 100vh; display: flex;
+            justify-content: center; align-items: center;
+            overflow: hidden; background-color: #000;
         }
 
         .bg-image {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://i.ibb.co/8LVbzyP2/1770038717427.png') no-repeat center center;
-            background-size: cover;
-            z-index: -1;
-            filter: brightness(0.6);
+            background-size: cover; z-index: -1; filter: brightness(0.6);
         }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            color: #fff;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
+            padding: 40px 30px; width: 90%; max-width: 400px;
+            text-align: center; color: #fff; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
         h2 { margin-top: 0; margin-bottom: 10px; font-weight: 800; font-size: 28px; }
         p { margin-bottom: 30px; color: rgba(255, 255, 255, 0.8); font-size: 14px; }
 
-        .input-group { margin-bottom: 20px; position: relative; text-align: right; }
-        
-        .input-field {
-            width: 100%; padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            color: #fff; font-size: 16px; outline: none; transition: 0.3s;
-        }
-        .input-field::placeholder { color: rgba(255, 255, 255, 0.6); }
-        .input-field:focus { border-color: #4dabf7; background: rgba(255, 255, 255, 0.2); }
-
-        .login-btn {
-            width: 100%; padding: 15px;
-            background: linear-gradient(135deg, #0056b3, #004494);
-            border: none; border-radius: 12px;
-            color: white; font-weight: bold; font-size: 16px;
-            cursor: pointer; margin-top: 10px; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.4);
-        }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 86, 179, 0.6); }
-
-        .divider { margin: 25px 0; font-size: 14px; color: rgba(255,255,255,0.5); position: relative; }
-        .divider::before, .divider::after {
-            content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.2);
-        }
-        .divider::before { left: 0; } .divider::after { right: 0; }
-
         .google-btn {
-            background: white; color: #333;
-            width: 100%; padding: 12px;
-            border-radius: 12px; border: none;
-            font-weight: bold; cursor: pointer;
+            background: white; color: #333; width: 100%; padding: 12px;
+            border-radius: 12px; border: none; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.3s;
+            transition: 0.3s; margin-top: 20px;
         }
         .google-btn:hover { background: #f1f1f1; transform: scale(1.02); }
 
-        .footer-text { margin-top: 25px; font-size: 12px; color: rgba(255,255,255,0.5); }
+        /* رسائل الحالة */
+        #status-msg { margin-top: 20px; font-weight: bold; font-size: 14px; display: none; }
+        .success { color: #4CAF50; }
+        .error { color: #ff4747; }
         
-        #loading-msg { display:none; margin-top:15px; color:#4dabf7; font-weight:bold; font-size: 14px; }
+        /* زر الانتقال اليدوي (يظهر عند الضرورة) */
+        #manual-redirect {
+            display: none; margin-top: 15px; background: #0056b3; 
+            color: white; padding: 10px 20px; border-radius: 8px; 
+            text-decoration: none; font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -97,30 +61,21 @@
         <h2>أهلاً بك 👋</h2>
         <p>يرجى تسجيل الدخول للوصول إلى لوحة التحكم</p>
 
-        <div class="input-group">
-            <input type="email" class="input-field" placeholder="اسم المستخدم أو الإيميل">
-        </div>
-        <div class="input-group">
-            <input type="password" class="input-field" placeholder="كلمة المرور">
-        </div>
-
-        <button class="login-btn" onclick="alert('يرجى استخدام زر جوجل للدخول كمسؤول')">تسجيل الدخول</button>
-
-        <div class="divider">أو</div>
-
         <button id="google-login-btn" class="google-btn">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             الدخول كمسؤول (Google)
         </button>
-        <div id="loading-msg">جاري التحقق وتوجيهك إلى لوحة التحكم... ⏳</div>
 
-        <div class="footer-text">Wsooly Admin Panel &copy; 2026</div>
+        <div id="status-msg"></div>
+        <a id="manual-redirect" href="./index.html">اضغط هنا للانتقال للوحة التحكم</a>
+
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">Wusooly Admin Panel</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // إضافة onAuthStateChanged للمراقبة المستمرة
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // إضافة setPersistence و browserLocalPersistence
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBa0RwEcbVqWYAKeUFeZy2IDihaxUxtNKY",
@@ -134,48 +89,58 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-
         const ALLOWED_ADMIN = "hmamda320@gmail.com";
-        const btn = document.getElementById('google-login-btn');
-        const loadingMsg = document.getElementById('loading-msg');
 
-        // 🔥 هذا هو الحل: مراقبة حالة الدخول فور تحميل الصفحة
+        const btn = document.getElementById('google-login-btn');
+        const statusMsg = document.getElementById('status-msg');
+        const manualLink = document.getElementById('manual-redirect');
+
+        function showStatus(text, type) {
+            statusMsg.innerText = text;
+            statusMsg.className = type;
+            statusMsg.style.display = 'block';
+        }
+
+        // 1. مراقبة الحالة (تعمل فور العودة من جوجل)
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // المستخدم مسجل دخول بالفعل (أو عاد من جوجل للتو)
-                checkAdmin(user);
-            } else {
-                // لا يوجد مستخدم، أظهر زر الدخول
-                resetUI();
+                if (user.email === ALLOWED_ADMIN) {
+                    // نجح الدخول
+                    showStatus(`أهلاً ${user.displayName.split(' ')[0]}! جاري توجيهك...`, "success");
+                    btn.style.display = 'none';
+                    
+                    // محاولة التوجيه التلقائي
+                    setTimeout(() => {
+                        window.location.href = "./index.html"; 
+                    }, 1500);
+
+                    // إظهار زر يدوي احتياطاً
+                    manualLink.style.display = "inline-block";
+                } else {
+                    // إيميل خاطئ
+                    showStatus("⛔ هذا الإيميل ليس للمدير!", "error");
+                    signOut(auth);
+                }
             }
         });
 
-        function checkAdmin(user) {
-            loadingMsg.style.display = 'block';
-            btn.style.display = 'none';
-            
-            if (user.email === ALLOWED_ADMIN) {
-                // ✅ الإيميل صحيح: توجيه فوري
-                window.location.href = "index.html";
-            } else {
-                // ⛔ الإيميل غير مصرح به
-                alert("⛔ عذراً! هذا الحساب ليس له صلاحية الدخول.");
-                signOut(auth).then(() => {
-                    resetUI();
-                });
-            }
-        }
-
-        function resetUI() {
-            loadingMsg.style.display = 'none';
-            btn.style.display = 'flex';
-        }
-
-        // عند الضغط على الزر
+        // 2. زر الدخول (مع تثبيت الجلسة)
         btn.addEventListener('click', () => {
-            btn.style.display = 'none';
-            loadingMsg.style.display = 'block';
-            signInWithRedirect(auth, provider);
+            showStatus("جاري الاتصال بجوجل...", "success");
+            
+            // فرض حفظ تسجيل الدخول في المتصفح
+            setPersistence(auth, browserLocalPersistence)
+                .then(() => {
+                    return signInWithRedirect(auth, provider);
+                })
+                .catch((error) => {
+                    showStatus("خطأ: " + error.message, "error");
+                });
+        });
+
+        // 3. التقاط أخطاء الـ Redirect إن وجدت
+        getRedirectResult(auth).catch((error) => {
+            showStatus("فشل الدخول: " + error.message, "error");
         });
     </script>
 
