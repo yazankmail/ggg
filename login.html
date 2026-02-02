@@ -114,13 +114,13 @@
         </button>
         <div id="loading-msg">جاري التحقق وتوجيهك إلى لوحة التحكم... ⏳</div>
 
-        <div class="footer-text">Wusooly Admin Panel &copy; 2026</div>
+        <div class="footer-text">Wsooly Admin Panel &copy; 2026</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // استخدام Redirect بدلاً من Popup لحل مشكلة المتصفح
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // إضافة onAuthStateChanged للمراقبة المستمرة
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBa0RwEcbVqWYAKeUFeZy2IDihaxUxtNKY",
@@ -139,30 +139,30 @@
         const btn = document.getElementById('google-login-btn');
         const loadingMsg = document.getElementById('loading-msg');
 
-        // 1. فحص النتيجة عند العودة من صفحة جوجل
-        getRedirectResult(auth)
-            .then((result) => {
-                if (result) {
-                    checkAdmin(result.user);
-                }
-            }).catch((error) => {
-                console.error(error);
-                alert("حدث خطأ: " + error.message);
+        // 🔥 هذا هو الحل: مراقبة حالة الدخول فور تحميل الصفحة
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // المستخدم مسجل دخول بالفعل (أو عاد من جوجل للتو)
+                checkAdmin(user);
+            } else {
+                // لا يوجد مستخدم، أظهر زر الدخول
                 resetUI();
-            });
+            }
+        });
 
-        // 2. التحقق من الإيميل
         function checkAdmin(user) {
             loadingMsg.style.display = 'block';
             btn.style.display = 'none';
             
             if (user.email === ALLOWED_ADMIN) {
-                // ✅ هنا التوجيه إلى index.html (لوحة التحكم الرئيسية)
+                // ✅ الإيميل صحيح: توجيه فوري
                 window.location.href = "index.html";
             } else {
+                // ⛔ الإيميل غير مصرح به
                 alert("⛔ عذراً! هذا الحساب ليس له صلاحية الدخول.");
-                signOut(auth);
-                resetUI();
+                signOut(auth).then(() => {
+                    resetUI();
+                });
             }
         }
 
@@ -171,7 +171,7 @@
             btn.style.display = 'flex';
         }
 
-        // 3. بدء عملية الدخول (تحويل الصفحة)
+        // عند الضغط على الزر
         btn.addEventListener('click', () => {
             btn.style.display = 'none';
             loadingMsg.style.display = 'block';
