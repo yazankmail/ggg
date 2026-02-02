@@ -16,21 +16,19 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            background-color: #000; /* لون احتياطي */
+            background-color: #000;
         }
 
-        /* الخلفية المخصصة */
         .bg-image {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: url('https://i.ibb.co/8LVbzyP2/1770038717427.png') no-repeat center center;
-            background-size: cover; /* لملء الشاشة بالكامل */
+            background-size: cover;
             z-index: -1;
-            filter: brightness(0.6); /* تعتيم بسيط لإبراز النص */
+            filter: brightness(0.6);
         }
 
-        /* بطاقة الزجاج (Glassmorphism) */
         .glass-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
@@ -51,32 +49,22 @@
         .input-group { margin-bottom: 20px; position: relative; text-align: right; }
         
         .input-field {
-            width: 100%;
-            padding: 15px 20px; /* مسافة للأيقونة */
+            width: 100%; padding: 15px 20px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
-            color: #fff;
-            font-size: 16px;
-            outline: none;
-            transition: 0.3s;
+            color: #fff; font-size: 16px; outline: none; transition: 0.3s;
         }
 
         .input-field::placeholder { color: rgba(255, 255, 255, 0.6); }
         .input-field:focus { border-color: #4dabf7; background: rgba(255, 255, 255, 0.2); }
 
         .login-btn {
-            width: 100%;
-            padding: 15px;
+            width: 100%; padding: 15px;
             background: linear-gradient(135deg, #0056b3, #004494);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
+            border: none; border-radius: 12px;
+            color: white; font-weight: bold; font-size: 16px;
+            cursor: pointer; margin-top: 10px; transition: 0.3s;
             box-shadow: 0 4px 15px rgba(0, 86, 179, 0.4);
         }
         .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 86, 179, 0.6); }
@@ -98,6 +86,8 @@
         .google-btn:hover { background: #f1f1f1; transform: scale(1.02); }
 
         .footer-text { margin-top: 25px; font-size: 12px; color: rgba(255,255,255,0.5); }
+        
+        #loading-msg { display:none; margin-top:10px; color:#4dabf7; font-weight:bold; }
     </style>
 </head>
 <body>
@@ -123,13 +113,15 @@
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             الدخول كمسؤول (Google)
         </button>
+        <div id="loading-msg">جاري التحقق من الصلاحيات...</div>
 
         <div class="footer-text">Wusooly Admin Panel &copy; 2026</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // استبدلنا signInWithPopup بـ signInWithRedirect و getRedirectResult
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBa0RwEcbVqWYAKeUFeZy2IDihaxUxtNKY",
@@ -144,33 +136,49 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // 🔒 الإيميل الوحيد المسموح له بالدخول
         const ALLOWED_ADMIN = "hmamda320@gmail.com";
+        const btn = document.getElementById('google-login-btn');
+        const loadingMsg = document.getElementById('loading-msg');
 
-        document.getElementById('google-login-btn').addEventListener('click', () => {
-            const btn = document.getElementById('google-login-btn');
-            btn.innerText = "جاري التحقق...";
-            
-            signInWithPopup(auth, provider)
-                .then((result) => {
+        // 1. التحقق عند عودة المستخدم من صفحة جوجل
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    // المستخدم عاد بنجاح، نتحقق من الإيميل
                     const user = result.user;
-                    
-                    // التحقق الأمني
-                    if (user.email === ALLOWED_ADMIN) {
-                        // نجاح: توجيه للوحة التحكم
-                        window.location.href = "admin.html";
-                    } else {
-                        // فشل: طرد المستخدم وتسجيل خروجه
-                        alert("⛔ عذراً! هذا الحساب لا يملك صلاحيات المسؤول.");
-                        signOut(auth);
-                        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> الدخول كمسؤول (Google)';
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    alert("حدث خطأ في التسجيل: " + error.message);
-                    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> الدخول كمسؤول (Google)';
-                });
+                    checkAdmin(user);
+                }
+            }).catch((error) => {
+                console.error(error);
+                alert("حدث خطأ أثناء الدخول: " + error.message);
+                resetUI();
+            });
+
+        // 2. دالة التحقق
+        function checkAdmin(user) {
+            loadingMsg.style.display = 'block';
+            btn.style.display = 'none';
+            
+            if (user.email === ALLOWED_ADMIN) {
+                // نجاح: توجيه للوحة التحكم (تأكد أن الملف اسمه index.html في هذا المجلد)
+                window.location.href = "index.html";
+            } else {
+                alert("⛔ عذراً! هذا الحساب لا يملك صلاحيات المسؤول.");
+                signOut(auth);
+                resetUI();
+            }
+        }
+
+        function resetUI() {
+            loadingMsg.style.display = 'none';
+            btn.style.display = 'flex';
+        }
+
+        // 3. عند الضغط على الزر (توجيه وليس نافذة منبثقة)
+        btn.addEventListener('click', () => {
+            btn.style.display = 'none';
+            loadingMsg.style.display = 'block';
+            signInWithRedirect(auth, provider);
         });
     </script>
 
