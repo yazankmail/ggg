@@ -55,7 +55,6 @@
             border-radius: 12px;
             color: #fff; font-size: 16px; outline: none; transition: 0.3s;
         }
-
         .input-field::placeholder { color: rgba(255, 255, 255, 0.6); }
         .input-field:focus { border-color: #4dabf7; background: rgba(255, 255, 255, 0.2); }
 
@@ -87,7 +86,7 @@
 
         .footer-text { margin-top: 25px; font-size: 12px; color: rgba(255,255,255,0.5); }
         
-        #loading-msg { display:none; margin-top:10px; color:#4dabf7; font-weight:bold; }
+        #loading-msg { display:none; margin-top:15px; color:#4dabf7; font-weight:bold; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -113,14 +112,14 @@
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             الدخول كمسؤول (Google)
         </button>
-        <div id="loading-msg">جاري التحقق من الصلاحيات...</div>
+        <div id="loading-msg">جاري التحقق وتوجيهك إلى لوحة التحكم... ⏳</div>
 
         <div class="footer-text">Wusooly Admin Panel &copy; 2026</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // استبدلنا signInWithPopup بـ signInWithRedirect و getRedirectResult
+        // استخدام Redirect بدلاً من Popup لحل مشكلة المتصفح
         import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -140,30 +139,28 @@
         const btn = document.getElementById('google-login-btn');
         const loadingMsg = document.getElementById('loading-msg');
 
-        // 1. التحقق عند عودة المستخدم من صفحة جوجل
+        // 1. فحص النتيجة عند العودة من صفحة جوجل
         getRedirectResult(auth)
             .then((result) => {
                 if (result) {
-                    // المستخدم عاد بنجاح، نتحقق من الإيميل
-                    const user = result.user;
-                    checkAdmin(user);
+                    checkAdmin(result.user);
                 }
             }).catch((error) => {
                 console.error(error);
-                alert("حدث خطأ أثناء الدخول: " + error.message);
+                alert("حدث خطأ: " + error.message);
                 resetUI();
             });
 
-        // 2. دالة التحقق
+        // 2. التحقق من الإيميل
         function checkAdmin(user) {
             loadingMsg.style.display = 'block';
             btn.style.display = 'none';
             
             if (user.email === ALLOWED_ADMIN) {
-                // نجاح: توجيه للوحة التحكم (تأكد أن الملف اسمه index.html في هذا المجلد)
+                // ✅ هنا التوجيه إلى index.html (لوحة التحكم الرئيسية)
                 window.location.href = "index.html";
             } else {
-                alert("⛔ عذراً! هذا الحساب لا يملك صلاحيات المسؤول.");
+                alert("⛔ عذراً! هذا الحساب ليس له صلاحية الدخول.");
                 signOut(auth);
                 resetUI();
             }
@@ -174,7 +171,7 @@
             btn.style.display = 'flex';
         }
 
-        // 3. عند الضغط على الزر (توجيه وليس نافذة منبثقة)
+        // 3. بدء عملية الدخول (تحويل الصفحة)
         btn.addEventListener('click', () => {
             btn.style.display = 'none';
             loadingMsg.style.display = 'block';
