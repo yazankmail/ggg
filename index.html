@@ -11,11 +11,11 @@
         :root {
             --primary: #0056b3; --bg-light: #F4F6F8; --white: #FFFFFF;
             --text-dark: #333; --sidebar-width: 260px;
+            --sidebar-bg: #1e293b; --sidebar-text: #cbd5e1;
         }
 
         body { 
-            font-family: 'Cairo', sans-serif; 
-            background: var(--bg-light); margin: 0; 
+            font-family: 'Cairo', sans-serif; background: var(--bg-light); margin: 0; 
             height: 100vh; overflow: hidden; color: var(--text-dark); 
         }
 
@@ -37,12 +37,12 @@
 
         /* القائمة الجانبية */
         .sidebar {
-            width: var(--sidebar-width); background: var(--white);
+            width: var(--sidebar-width); background: var(--sidebar-bg);
             height: 100%; position: fixed; right: 0; top: 0;
-            border-left: 1px solid #eee; display: flex; flex-direction: column;
+            display: flex; flex-direction: column; color: var(--sidebar-text);
         }
-        .logo-area { padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
-        .logo-area h2 { margin: 0; color: var(--primary); }
+        .logo-area { padding: 25px; text-align: center; border-bottom: 1px solid #334155; }
+        .logo-area h2 { margin: 0; color: #fff; }
         
         .nav-links { list-style: none; padding: 20px 10px; margin: 0; flex-grow: 1; }
         
@@ -50,13 +50,13 @@
         .nav-item { 
             padding: 12px 20px; border-radius: 10px; cursor: pointer; 
             display: flex; align-items: center; gap: 10px; 
-            color: #666; margin-bottom: 5px; text-decoration: none; font-weight: 600;
+            color: var(--sidebar-text); margin-bottom: 5px; text-decoration: none; font-weight: 600;
             transition: 0.2s;
         }
-        .nav-item.active, .nav-item:hover { background: #e3f2fd; color: var(--primary); }
+        .nav-item.active, .nav-item:hover { background: #334155; color: #fff; }
         .nav-item svg { width: 22px; height: 22px; }
 
-        .logout-area { padding: 20px; border-top: 1px solid #eee; }
+        .logout-area { padding: 20px; border-top: 1px solid #334155; }
         .logout-btn { width: 100%; padding: 12px; background: #ffebee; color: #d32f2f; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
         /* المحتوى الرئيسي */
@@ -85,7 +85,7 @@
 
     <div id="dashboard-content">
         <aside class="sidebar">
-            <div class="logo-area"><h2>Admin Panel 🚀</h2></div>
+            <div class="logo-area"><h2>Wusooly Admin 🚀</h2></div>
             <div class="nav-links">
                 <a href="index.html" class="nav-item active">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -111,10 +111,10 @@
             <h1 id="welcome-msg">أهلاً بك 👋</h1>
             
             <div class="stats-grid">
-                <div class="stat-card"><h3>124</h3><p>الزوار</p></div>
-                <div class="stat-card"><h3>35</h3><p>الطلبات</p></div>
+                <div class="stat-card"><h3>1,245</h3><p>الزوار</p></div>
+                <div class="stat-card"><h3>2,859</h3><p>الطلبات</p></div>
                 <div class="stat-card"><h3>₪1,200</h3><p>الأرباح</p></div>
-                <div class="stat-card"><h3>5</h3><p>تنبيهات</p></div>
+                <div class="stat-card"><h3>38</h3><p>تنبيهات</p></div>
             </div>
 
             <div class="charts-container">
@@ -143,16 +143,10 @@
 
         onAuthStateChanged(auth, (user) => {
             const loading = document.getElementById('loading-screen');
-            
-            if (user) {
-                if (user.email === ADMIN_EMAIL) {
-                    document.getElementById('welcome-msg').innerText = `أهلاً، ${user.displayName.split(' ')[0]} 👋`;
-                    loading.style.display = 'none';
-                    document.getElementById('dashboard-content').style.display = 'block';
-                } else {
-                    alert("غير مصرح لك!");
-                    signOut(auth).then(() => window.location.href = "login.html");
-                }
+            if (user && user.email === ADMIN_EMAIL) {
+                document.getElementById('welcome-msg').innerText = `أهلاً، ${user.displayName.split(' ')[0]} 👋`;
+                loading.style.display = 'none';
+                document.getElementById('dashboard-content').style.display = 'block';
             } else {
                 window.location.href = "login.html";
             }
@@ -160,14 +154,13 @@
 
         window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
 
-        // الرسوم البيانية
         new Chart(document.getElementById('chart1'), {
             type: 'line',
             data: { labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'], datasets: [{ label: 'Visitors', data: [10, 20, 15, 30, 25, 40, 35], borderColor: '#0056b3', fill: true }] }
         });
         new Chart(document.getElementById('chart2'), {
             type: 'doughnut',
-            data: { labels: ['A', 'B', 'C'], datasets: [{ data: [30, 50, 20], backgroundColor: ['#0056b3', '#008489', '#FF9800'] }] }
+            data: { labels: ['ملابس', 'الكترونيات', 'اكسسوارات'], datasets: [{ data: [30, 50, 20], backgroundColor: ['#0056b3', '#008489', '#FF9800'] }] }
         });
     </script>
 </body>
